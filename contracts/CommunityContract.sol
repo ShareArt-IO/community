@@ -1,8 +1,8 @@
 pragma solidity ^0.4.18;
 
 /**
- *@dev this contract will lock supply until six month 
- *fund/team/advisor will be controled by this contract
+ *@title Community Contract
+ *@dev this only for the member of the community
  */
  
 contract Token {
