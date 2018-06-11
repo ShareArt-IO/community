@@ -93,12 +93,15 @@ contract LockableTokenImpl {
         }
     }
 
-    function lockMonthly(address _addr) internal {
+    function lock(address _addr,uint256 _percent) internal {
         if (lockBalances[_addr].balance > 0) {
+            if(_percent > 100){
+                _percent = 100;
+            }
             if (lockBalances[_addr].releaseAmountPerMonth == 0) {
                 lockBalances[_addr].round=round;
             } 
-            lockBalances[_addr].releaseAmountPerMonth = lockBalances[_addr].balance.mul(10).div(100);
+            lockBalances[_addr].releaseAmountPerMonth = lockBalances[_addr].balance.mul(_percent).div(100);
         }
     }
     
@@ -160,8 +163,8 @@ contract SAToken is Ownable, Token , LockableTokenImpl {
         round = round + 1;
     }
     
-    function releaseLimit(address _to) public {
-        lockMonthly(_to);
+    function lockTransfer(address _to,uint256 _percent) public {
+        lock(_to,_percent);
     }
     
     function transfer(address _to, uint256 _value) public returns (bool success) {

@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 contract Token {
     function transfer(address _to, uint256 _value) public returns (bool);
-    function releaseLimit(address _to) public;
+    function lockTransfer(address _to, uint256 _percent) public;
 }
 
 library SafeMath {
@@ -55,13 +55,17 @@ contract InvestorContract is Ownable {
     Token public tokenReward;
     address public receiptAddress;
     uint256 public price;
+    uint8 public percent=10;  
     bool  public isCrowding=false;
     mapping(address => uint256) public balances;
     event Transfer(bool, uint256);
     
-    function InvestorContract(address _addr,uint256 _price) public {
+    function InvestorContract(address _addr,uint256 _price,uint8 _percent) public {
+        require(_price >0 && _percent >= 0 && _percent <= 100);
+        require(_addr != address(0) );
         receiptAddress = _addr;
         price = _price;
+        percent = _percent;
     }
     
     function connectTokenAddress(address _tokenAddr) public onlyOwner {
@@ -72,13 +76,19 @@ contract InvestorContract is Ownable {
         isCrowding=_isStart;
     }
     
+    function nextRound(uint256 _price,uint8 _percent) public onlyOwner {
+        require(_price >0 && _percent >= 0 && _percent <= 100);
+        price=_price;
+        percent = _percent;
+    }
+
     function () public payable {
         require(isCrowding == true);
         require(msg.value > 0 && price > 0);
         uint256 value=price.mul(msg.value);
         receiptAddress.transfer(msg.value);
         tokenReward.transfer(msg.sender, value); 
-        tokenReward.releaseLimit(msg.sender);
+        tokenReward.lockTransfer(msg.sender,percent);
         balances[msg.sender] = balances[msg.sender].add(msg.value); 
         emit Transfer(true, value);
     }

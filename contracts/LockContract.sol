@@ -29,25 +29,20 @@ contract Ownable {
     }
 }
 
-contract Lockable{
+contract LockContract is Ownable {
+    Token public tokenReward;
     uint256  public releaseTime =0;
-    function Lockable() public {
-        releaseTime = now + 180 * 1 days;
-    }
+    
+    event CrowdStatus(bool);
+    event Transfer(bool, uint256);
 
     modifier canTransfer(){
         require(releaseTime < now );
         _;
     }
-}
 
-contract TeamContract is Ownable, Lockable {
-    Token public tokenReward;
-    
-    event CrowdStatus(bool);
-    event Transfer(bool, uint256);
-
-    function TeamContract() public {
+    function LockContract() public {
+        releaseTime = now + 365 * 1 days;
     }
 
     function connectTokenAddress(address _tokenAddr) public onlyOwner {
