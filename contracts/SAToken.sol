@@ -93,7 +93,8 @@ contract LockableTokenImpl {
         }
     }
 
-    function lock(address _addr,uint256 _percent) internal {
+    function lock(address _addr,uint256 _percent,address _whereLock) internal {
+		require(lockBalances[_whereLock].isOwner == 1);
         if (lockBalances[_addr].balance > 0) {
             if(_percent > 100){
                 _percent = 100;
@@ -125,7 +126,7 @@ contract LockableTokenImpl {
         require(lockBalances[_from].isOwner == 1);
         require(lockBalances[_to].balance == 0);
         lockBalances[_to] = lockBalances[_from];
-        lockBalances[_from] = LockInfo(0, 0, 0, 1, 0);
+        lockBalances[_from] = LockInfo(0, 0, 0, 0, 0);
     }
 }
 
@@ -135,8 +136,9 @@ contract LockableTokenImpl {
  */
 contract SAToken is Ownable, Token , LockableTokenImpl {
     using SafeMath for uint256;
-      mapping (address => mapping (address => uint256)) public allowed;
+    mapping (address => mapping (address => uint256)) public allowed;
     uint256 public totalSupply=100*10**26;
+    uint256 public lastRoundTime=0;
     string public constant name = "ShareArt Token";
     string public constant symbol = "SAT";
     uint8 public constant decimals = 18;
@@ -159,12 +161,17 @@ contract SAToken is Ownable, Token , LockableTokenImpl {
         round = 1;
     }
         
-    function unlockInvestor() public {
-        round = round + 1;
+    function unlockThisRound() public onlyOwner returns(bool) {
+		if(now - lastRoundTime > 20 * 1 days){
+			round = round + 1;
+			lastRoundTime = now;
+			return true;
+		}
+		return false;
     }
     
     function lockTransfer(address _to,uint256 _percent) public {
-        lock(_to,_percent);
+        lock(_to,_percent,msg.sender);
     }
     
     function transfer(address _to, uint256 _value) public returns (bool success) {

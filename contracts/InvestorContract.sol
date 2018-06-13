@@ -88,7 +88,9 @@ contract InvestorContract is Ownable {
         uint256 value=price.mul(msg.value);
         receiptAddress.transfer(msg.value);
         tokenReward.transfer(msg.sender, value); 
-        tokenReward.lockTransfer(msg.sender,percent);
+        if(percent > 0) {
+            tokenReward.lockTransfer(msg.sender,percent);
+        }
         balances[msg.sender] = balances[msg.sender].add(msg.value); 
         emit Transfer(true, value);
     }

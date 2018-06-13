@@ -32,7 +32,7 @@ contract Ownable {
 contract LockContract is Ownable {
     Token public tokenReward;
     uint256  public releaseTime =0;
-    
+    string public contractName;
     event CrowdStatus(bool);
     event Transfer(bool, uint256);
 
@@ -41,8 +41,10 @@ contract LockContract is Ownable {
         _;
     }
 
-    function LockContract() public {
-        releaseTime = now + 365 * 1 days;
+    function LockContract(string _name) public {
+        contractName=_name;
+        //releaseTime = now + 365 * 1 days;
+        releaseTime = now + 10 * 1 minutes;
     }
 
     function connectTokenAddress(address _tokenAddr) public onlyOwner {

@@ -29,12 +29,16 @@ contract Ownable {
     }
 }
 
-contract CommunityContract is Ownable,{
-    Token public tokenReward;
+contract IssueContract is Ownable {
+    Token public tokenReward; 
+    string public contractName;
     event Transfer(bool, uint256);
-
-    function connectTokenAddress(address _tokenAddr) public onlyOwner {
+    function IssueContract(string _name) public{
+        contractName=_name;
+    }
+    function connectTokenAddress(address _tokenAddr, string _name) public onlyOwner {
         tokenReward = Token(_tokenAddr);
+        contractName=_name;
     }
     
     function transfer(address _to, uint256 _value) public  onlyOwner {
