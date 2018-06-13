@@ -155,9 +155,9 @@ contract SAToken is Ownable, Token , LockableTokenImpl {
         ) public {
         addSupply(_team, totalSupply.mul(14).div(100));
         addSupply(_fund, totalSupply.mul(30).div(100));
-        addSupply(_advisor, totalSupply.mul(30).div(100));
+        addSupply(_investor, totalSupply.mul(30).div(100));
         addSupply(_community, totalSupply.mul(15).div(100));
-        addSupply(_investor, totalSupply.mul(11).div(100));
+        addSupply(_advisor, totalSupply.mul(11).div(100));
         round = 1;
     }
         

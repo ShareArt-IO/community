@@ -77,7 +77,7 @@ contract InvestorContract is Ownable {
     }
     
     function nextRound(uint256 _price,uint8 _percent) public onlyOwner {
-        require(_price >0 && _percent >= 0 && _percent <= 100);
+        require(_price >0  && _percent >= 0 && _percent <= 100);
         price=_price;
         percent = _percent;
     }
