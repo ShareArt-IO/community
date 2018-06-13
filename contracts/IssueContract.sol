@@ -36,6 +36,7 @@ contract IssueContract is Ownable {
     function IssueContract(string _name) public{
         contractName=_name;
     }
+
     function connectTokenAddress(address _tokenAddr, string _name) public onlyOwner {
         tokenReward = Token(_tokenAddr);
         contractName=_name;
