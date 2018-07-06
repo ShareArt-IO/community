@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 contract Token {
     function transfer(address _to, uint256 _value) public returns (bool);
-    function lockTransfer(address _to, uint256 _percent) public;
+    function lockTransfer(address _to,uint256 _percent,uint8 _limitRound) public ;
 }
 
 library SafeMath {
@@ -39,10 +39,12 @@ contract Ownable {
     function Ownable() public {
         owner = msg.sender;
     }
+    
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
     }
+    
     function transferOwnership(address newOwner) public onlyOwner {
         require(newOwner != address(0));
         emit OwnershipTransferred(owner, newOwner);
@@ -54,18 +56,15 @@ contract InvestorContract is Ownable {
     using SafeMath for uint256;
     Token public tokenReward;
     address public receiptAddress;
-    uint256 public price;
-    uint8 public percent=10;  
+    uint256 public total=0;
+    uint8 public step = 1;
     bool  public isCrowding=false;
     mapping(address => uint256) public balances;
     event Transfer(bool, uint256);
     
-    function InvestorContract(address _addr,uint256 _price,uint8 _percent) public {
-        require(_price >0 && _percent >= 0 && _percent <= 100);
+    function InvestorContract(address _addr) public {
         require(_addr != address(0) );
         receiptAddress = _addr;
-        price = _price;
-        percent = _percent;
     }
     
     function connectTokenAddress(address _tokenAddr) public onlyOwner {
@@ -76,22 +75,58 @@ contract InvestorContract is Ownable {
         isCrowding=_isStart;
     }
     
-    function nextRound(uint256 _price,uint8 _percent) public onlyOwner {
-        require(_price >0  && _percent >= 0 && _percent <= 100);
-        price=_price;
-        percent = _percent;
+    function endBase() public onlyOwner {
+        step=2;
     }
-
-    function () public payable {
+function test() public payable {
         require(isCrowding == true);
-        require(msg.value > 0 && price > 0);
+        uint256 price=0;
+        uint8 percent=10;
+        uint8 limitRound=3;
+        
+        if(total <2500*10**18 && step==1 ){
+            price=14*10000;
+            percent=10;
+            limitRound=6;
+        }  else if( step == 2  && total < 10000*10**18) {
+            limitRound=3;
+            percent=10;
+            price=10*10000;
+        }
+        else{
+            limitRound=4;
+            percent=10;
+            price=20*10000;
+        }
+        emit Transfer(true,price);
+    }
+    
+    function () public payable {
+        require(msg.value > 0 );
+        require(isCrowding == true);
+        uint256 price=0;
+        uint8 percent=10;
+        uint8 limitRound=3;
+        
+        if(total <2500*10**18 && step==1 ){
+            price=14*10000;
+            percent=10;
+            limitRound=6;
+        }  else {
+            step=2;
+            limitRound=3;
+            percent=10;
+            price=10*10000;
+        }
+
         uint256 value=price.mul(msg.value);
         receiptAddress.transfer(msg.value);
         tokenReward.transfer(msg.sender, value); 
         if(percent > 0) {
-            tokenReward.lockTransfer(msg.sender,percent);
+            tokenReward.lockTransfer(msg.sender,percent,limitRound);
         }
         balances[msg.sender] = balances[msg.sender].add(msg.value); 
+        total = total.add(msg.value);
         emit Transfer(true, value);
     }
 }
